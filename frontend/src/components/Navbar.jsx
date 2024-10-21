@@ -1,6 +1,22 @@
+import { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../provider/AuthProvider";
+import { FiLogOut } from "react-icons/fi"; // Importing logout icon from react-icons
 
 function Navbar() {
+  const { user, logOut } = useContext(AuthContext);
+  console.log(user);
+
+  const handleLogout = () => {
+    logOut()
+      .then(() => {
+        console.log("User logged out successfully");
+      })
+      .catch((error) => {
+        console.error("Error during logout:", error);
+      });
+  };
+
   return (
     <>
       <div className="navbar bg-gray-400 px-32">
@@ -63,13 +79,31 @@ function Navbar() {
             </li>
           </ul>
         </div>
-        <div className="navbar-end">
-          <Link
-            to={"/login"}
-            className="btn bg-green-500 text-white hover:bg-green-600 border-none"
-          >
-            Login
-          </Link>
+        <div className="navbar-end flex items-center space-x-4">
+          {user ? (
+            <>
+              <p className="capitalize text-white text-xl">
+                {user.displayName}
+              </p>
+              {/* Logout button with an icon */}
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1 text-xs bg-red-500  text-white hover:bg-red-600 border-none flex items-center"
+              >
+                <FiLogOut className="mr-2" />
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to={"/login"}
+                className="btn bg-green-500 text-white hover:bg-green-600 border-none"
+              >
+                Login
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </>
