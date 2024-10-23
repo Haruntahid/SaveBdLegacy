@@ -1,40 +1,58 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../provider/AuthProvider";
-import { updateProfile } from "firebase/auth";
+import axios from "axios";
 import toast from "react-hot-toast";
+import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 
 function Registration() {
-  const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { registerUser, loading } = useContext(AuthContext);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirm_password: "",
+  });
+  const [showPassword, setShowPassword] = useState(false); // Toggle for password visibility
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const name = event.target.name.value;
-    const email = event.target.email.value;
-    const password = event.target.password.value;
-    const confirm_password = event.target.confirm_password.value;
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { name, email, password, confirm_password } = formData;
+
+    // Validate password length
+    if (password.length < 8) {
+      return setError("Password must be at least 8 characters long");
+    }
+
+    // Validate password and confirm password match
     if (password !== confirm_password) {
       return setError("Password and Confirm Password must be the same");
     }
 
-    try {
-      const res = await registerUser(email, password);
-      const user = res.user;
+    // Clear error if validation passes
+    setError("");
 
-      // Update user profile with displayName
-      await updateProfile(user, {
-        displayName: name,
+    const newUser = { name, email, password, role: "user" };
+    console.log(newUser);
+
+    // API call
+    axios
+      .post("http://localhost:8000/registration", newUser)
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.insertedId) {
+          toast.success("Registration Successful!");
+          navigate("/");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        // Handle error (e.g., show error message)
       });
-
-      toast.success("Registration Successful!");
-      navigate("/");
-    } catch (error) {
-      console.error("Error during registration:", error);
-      setError(error.message);
-    }
   };
 
   return (
@@ -44,6 +62,7 @@ function Registration() {
           <div className="card bg-base-100 shadow-2xl min-w-xl">
             <form onSubmit={handleSubmit} className="card-body min-w-xl">
               <h2 className="text-center font-bold text-3xl">Registration</h2>
+
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Name</span>
@@ -53,9 +72,12 @@ function Registration() {
                   type="text"
                   placeholder="Name"
                   className="input input-bordered"
+                  value={formData.name}
+                  onChange={handleChange}
                   required
                 />
               </div>
+
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Email</span>
@@ -65,21 +87,36 @@ function Registration() {
                   type="email"
                   placeholder="Email"
                   className="input input-bordered"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                 />
               </div>
-              <div className="form-control">
+
+              <div className="form-control relative">
                 <label className="label">
                   <span className="label-text">Password</span>
                 </label>
                 <input
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"} // Toggling password visibility
                   placeholder="Password"
                   className="input input-bordered"
+                  value={formData.password}
+                  onChange={handleChange}
                   required
                 />
+
+                {formData.password && (
+                  <span
+                    className="absolute right-3 bottom-4 cursor-pointer"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <AiFillEyeInvisible /> : <AiFillEye />}
+                  </span>
+                )}
               </div>
+
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Confirm Password</span>
@@ -89,44 +126,25 @@ function Registration() {
                   type="password"
                   placeholder="Confirm Password"
                   className="input input-bordered"
+                  value={formData.confirm_password}
+                  onChange={handleChange}
                   required
                 />
               </div>
+
               <div>
                 {error && <span className="text-rose-600 mt-4">{error}</span>}
               </div>
+
               <div className="form-control mt-6">
                 <button
                   type="submit"
                   className="btn bg-green-500 text-white hover:bg-green-600 flex justify-center items-center"
-                  disabled={loading} // Disable button while loading
                 >
-                  {loading ? (
-                    <svg
-                      className="animate-spin h-5 w-5 mr-2 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v8h8a8 8 0 01-8 8v-8H4z"
-                      ></path>
-                    </svg>
-                  ) : (
-                    "Register"
-                  )}
+                  Register
                 </button>
               </div>
+
               <div className="py-5">
                 <p className="text-center">
                   Already have an account?{" "}

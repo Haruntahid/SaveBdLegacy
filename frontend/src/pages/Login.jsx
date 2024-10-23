@@ -1,27 +1,42 @@
-import { useContext } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../provider/AuthProvider";
+import axios from "axios";
 import toast from "react-hot-toast";
 
 function Login() {
   const navigate = useNavigate();
-  const { logIn, loading } = useContext(AuthContext);
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false); // Loading state
+  const [error, setError] = useState(""); // Error state
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  // Handle input change
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-    const email = event.target.email.value;
-    const password = event.target.password.value;
+  // Handle form submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true); // Start loading
+    const { email, password } = formData;
 
-    logIn(email, password)
-      .then((res) => {
-        console.log(res);
+    try {
+      // Make API call to login endpoint
+      const res = await axios.post("http://localhost:8000/login", {
+        email,
+        password,
+      });
+
+      if (res.status === 200) {
         toast.success("Login successful!");
         navigate("/");
-      })
-      .catch((error) => {
-        toast.error(error.message);
-      });
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed. Try again."); // Set error
+      toast.error(err.response?.data?.message || "Login failed.");
+    } finally {
+      setLoading(false); // Stop loading
+    }
   };
 
   return (
@@ -31,6 +46,8 @@ function Login() {
           <div className="card bg-base-100 shadow-2xl min-w-xl">
             <form onSubmit={handleSubmit} className="card-body min-w-xl">
               <h2 className="text-center font-bold text-3xl">Login</h2>
+
+              {/* Email Input */}
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Email</span>
@@ -40,9 +57,13 @@ function Login() {
                   type="email"
                   placeholder="email"
                   className="input input-bordered"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                 />
               </div>
+
+              {/* Password Input */}
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Password</span>
@@ -52,6 +73,8 @@ function Login() {
                   type="password"
                   placeholder="password"
                   className="input input-bordered"
+                  value={formData.password}
+                  onChange={handleChange}
                   required
                 />
                 <label className="label">
@@ -60,6 +83,11 @@ function Login() {
                   </a>
                 </label>
               </div>
+
+              {/* Display error message */}
+              {error && <span className="text-rose-600 mt-4">{error}</span>}
+
+              {/* Submit Button */}
               <div className="form-control mt-6">
                 <button
                   type="submit"
@@ -92,6 +120,8 @@ function Login() {
                   )}
                 </button>
               </div>
+
+              {/* Link to Registration */}
               <div className="py-5">
                 <p className="text-center">
                   New Here?{" "}

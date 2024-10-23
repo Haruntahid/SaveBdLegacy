@@ -19,7 +19,7 @@ function Navbar() {
 
   return (
     <>
-      <div className="navbar bg-gray-400 px-32">
+      <div className="navbar bg-gray-400 px-10">
         <div className="navbar-start">
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -70,6 +70,9 @@ function Navbar() {
             </li>
             <li>
               <a>বাংলাদেশের স্থাপনা</a>
+            </li>
+            <li>
+              <a>Create Post</a>
             </li>
             <li>
               <a>স্থাপনার কাল ভিত্তিক পরিবর্তন</a>

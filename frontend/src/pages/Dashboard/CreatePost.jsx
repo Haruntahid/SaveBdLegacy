@@ -11,9 +11,9 @@ function CreatePost() {
       reader.onloadend = () => {
         setImagePreview(reader.result);
       };
-      reader.readAsDataURL(file); // Convert image to base64 string
+      reader.readAsDataURL(file);
     } else {
-      setImagePreview(null); // Reset if no file
+      setImagePreview(null);
     }
   };
 
@@ -23,7 +23,7 @@ function CreatePost() {
   };
 
   return (
-    <div className="mt-48 flex flex-col items-center justify-center">
+    <div className="mt-5 flex flex-col items-center justify-center">
       <h2 className="text-6xl mb-6 font-bold">Create Post</h2>
       <form className="w-full max-w-7xl bg-white p-8 shadow-2xl rounded-lg">
         <div className="mb-6">

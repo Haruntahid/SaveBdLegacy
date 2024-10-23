@@ -30,7 +30,7 @@ export const router = createBrowserRouter([
     element: <DashboardLayout />,
     children: [
       {
-        path: "/dashboard/create-post",
+        path: "/dashboard",
         element: <CreatePost />,
       },
     ],

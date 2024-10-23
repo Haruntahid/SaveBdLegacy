@@ -35,7 +35,7 @@ function DashboardLayout() {
           <div className="flex flex-col gap-4 flex-1 mt-6">
             {/* content routes are here */}
             <NavLink
-              to={"/dashboard/create-post"}
+              to={"/dashboard"}
               className={({ isActive }) =>
                 isActive
                   ? "flex items-center px-3 py-2 text-white transition-colors duration-300 transform rounded-lg bg-black"
@@ -79,9 +79,6 @@ function DashboardLayout() {
             <IoMenu size={24} />
           </button>
           <div className="p-5">
-            <p className="text-center font-bold text-5xl">
-              Welcome to SaveBdLegacy
-            </p>
             <Outlet />
           </div>
         </div>
