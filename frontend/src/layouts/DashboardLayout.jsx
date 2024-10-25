@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { CiLogout } from "react-icons/ci";
 import { IoClose, IoMenu } from "react-icons/io5";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { MdOutlinePostAdd } from "react-icons/md";
+import { AuthContext } from "../provider/AuthProvider";
 
 function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { logOut } = useContext(AuthContext);
 
   //   toogle bar for mobile view
   const toggleSidebar = () => {
@@ -50,7 +52,7 @@ function DashboardLayout() {
           {/* Footer logout btn */}
           <div className="pb-10">
             <button
-              //   onClick={logout}
+              onClick={logOut}
               className="flex w-full items-center px-3 py-2 text-gray-600 transition-colors duration-300 transform rounded-lg dark:text-gray-300 bg-rose-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 hover:text-gray-700"
             >
               <CiLogout size={20} color="#fff" />
