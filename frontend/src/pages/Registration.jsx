@@ -46,7 +46,7 @@ function Registration() {
         console.log(res.data);
         if (res.data.insertedId) {
           toast.success("Registration Successful!");
-          navigate("/");
+          navigate("/login");
         }
       })
       .catch((err) => {

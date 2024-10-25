@@ -5,6 +5,9 @@ const port = process.env.PORT || 8000;
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const bcrypt = require("bcryptjs");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
 
 // middlewares
 app.use(cors());
@@ -21,10 +24,22 @@ const client = new MongoClient(uri, {
   },
 });
 
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+const upload = multer({ storage });
+
 async function run() {
   try {
     // collections
     const usersCollection = client.db("saveBdLegacy").collection("all-users");
+    const postsCollection = client.db("saveBdLegacy").collection("posts");
 
     app.get("/", async (req, res) => {
       res.send("SERVER IS RUNNING......");
@@ -77,9 +92,17 @@ async function run() {
         return res.status(401).send({ message: "Invalid credentials" });
       }
 
-      // Send a success response along with user data (you may exclude the password)
+      // Generate JWT token
+      const token = jwt.sign(
+        { id: user._id, email: user.email },
+        "tahidtaha997",
+        { expiresIn: "1h" }
+      );
+
+      // Send the token and user data
       res.status(200).send({
         message: "Login successful",
+        token, // Include the token
         user: {
           id: user._id,
           name: user.name,
@@ -89,8 +112,49 @@ async function run() {
       });
     });
 
-    // create post
-    app.post("/create-post", async (req, res) => {});
+    // Create post with file upload support
+    app.post("/create-post", upload.array("media", 10), async (req, res) => {
+      try {
+        const { title, description, userEmail, userRole, userName } = req.body; // Get user data from body
+        const mediaPaths = req.files.map((file) => file.path); // Array of file paths
+
+        // Determine the status based on user role
+        let status;
+        if (userRole === "admin" || userRole === "moderator") {
+          status = "approved";
+        } else {
+          status = "pending";
+        }
+
+        // Construct new post object
+        const newPost = {
+          title,
+          description,
+          media: mediaPaths,
+          postedBy: { userName, userEmail, userRole },
+          status, // Include status based on role
+        };
+
+        // Insert post into database
+        const result = await postsCollection.insertOne(newPost);
+        res
+          .status(201)
+          .send({ message: "Post created successfully", post: result });
+      } catch (error) {
+        console.error("Error creating post:", error);
+        res.status(500).send({ message: "Failed to create post" });
+      }
+    });
+
+    // get user and user role role api
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersCollection.findOne(query, {
+        projection: { password: 0 },
+      });
+      res.send(user);
+    });
 
     await client.db("admin").command({ ping: 1 });
     console.log(

@@ -1,10 +1,14 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../provider/AuthProvider";
-import { FiLogOut } from "react-icons/fi"; // Importing logout icon from react-icons
+import { FiLogOut } from "react-icons/fi";
+import useUser from "../hooks/useUser";
 
 function Navbar() {
   const { user, logOut } = useContext(AuthContext);
+  const { userData, role } = useUser();
+  console.log(userData);
+  console.log(role);
   console.log(user);
 
   const handleLogout = () => {
@@ -72,22 +76,22 @@ function Navbar() {
               <a>বাংলাদেশের স্থাপনা</a>
             </li>
             <li>
-              <a>Create Post</a>
+              <Link to={"/create-post"}>Create Post</Link>
             </li>
             <li>
               <a>স্থাপনার কাল ভিত্তিক পরিবর্তন</a>
             </li>
-            <li>
-              <Link to={"/dashboard"}>Dashboard</Link>
-            </li>
+            {user && (role === "admin" || role === "moderator") ? (
+              <li>
+                <Link to="/dashboard">Dashboard</Link>
+              </li>
+            ) : null}
           </ul>
         </div>
         <div className="navbar-end flex items-center space-x-4">
           {user ? (
             <>
-              <p className="capitalize text-white text-xl">
-                {user.displayName}
-              </p>
+              <p className="capitalize text-white text-xl">{userData?.name}</p>
               {/* Logout button with an icon */}
               <button
                 onClick={handleLogout}
