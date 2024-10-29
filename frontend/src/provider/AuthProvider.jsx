@@ -5,45 +5,52 @@ export const AuthContext = createContext(null);
 
 function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const savedToken = localStorage.getItem("token");
 
-    if (token) {
+    if (savedToken) {
       try {
-        const decodedToken = JSON.parse(atob(token.split(".")[1]));
+        const decodedToken = JSON.parse(atob(savedToken.split(".")[1]));
         const { email } = decodedToken;
-        setUser(email); // Set user from token
+        setUser(email);
+        setToken(savedToken);
       } catch (error) {
         console.error(error);
         setUser(null);
+        setToken(null);
       } finally {
         setLoading(false);
       }
     } else {
       setUser(null);
+      setToken(null);
       setLoading(false);
     }
   }, []);
 
   const logIn = (userEmail, token) => {
     setUser(userEmail);
+    setToken(token);
     localStorage.setItem("token", token);
   };
 
   const logOut = () => {
     setLoading(true);
     setUser(null);
+    setToken(null);
     localStorage.removeItem("token");
     setLoading(false);
   };
 
   const authInfo = {
     user,
+    token,
     loading,
     setLoading,
-    logIn, // Added logIn function for use in Login component
+    logIn,
     logOut,
   };
 

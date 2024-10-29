@@ -2,14 +2,14 @@ import { useContext, useState } from "react";
 import { CiLogout } from "react-icons/ci";
 import { IoClose, IoMenu } from "react-icons/io5";
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { MdOutlinePostAdd } from "react-icons/md";
+import { MdOutlinePostAdd, MdPending } from "react-icons/md"; // Use MdPending for pending posts
 import { AuthContext } from "../provider/AuthProvider";
 
 function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { logOut } = useContext(AuthContext);
 
-  //   toogle bar for mobile view
+  // Toggle sidebar for mobile view
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -38,6 +38,7 @@ function DashboardLayout() {
             {/* content routes are here */}
             <NavLink
               to={"/dashboard"}
+              end
               className={({ isActive }) =>
                 isActive
                   ? "flex items-center px-3 py-2 text-white transition-colors duration-300 transform rounded-lg bg-black"
@@ -46,6 +47,17 @@ function DashboardLayout() {
             >
               <MdOutlinePostAdd size={25} />
               <span className="mx-2 font-medium">Create Post</span>
+            </NavLink>
+            <NavLink
+              to={"/dashboard/pending-post"}
+              className={({ isActive }) =>
+                isActive
+                  ? "flex items-center px-3 py-2 text-white transition-colors duration-300 transform rounded-lg bg-black"
+                  : "flex items-center px-3 py-2 text-black transition-colors duration-300 transform rounded-lg bg-green-400"
+              }
+            >
+              <MdPending size={25} />
+              <span className="mx-2 font-medium">Pending Post</span>
             </NavLink>
           </div>
 
@@ -85,7 +97,6 @@ function DashboardLayout() {
           </div>
         </div>
       </div>
-      );
     </>
   );
 }

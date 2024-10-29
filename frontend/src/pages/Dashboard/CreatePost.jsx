@@ -1,14 +1,20 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import axios from "axios";
 import useUser from "../../hooks/useUser";
+import toast from "react-hot-toast";
+import { AuthContext } from "../../provider/AuthProvider";
 
 function CreatePost() {
   const { userData } = useUser();
+  const { token } = useContext(AuthContext);
   const [mediaPreviews, setMediaPreviews] = useState([]);
   const [fileNames, setFileNames] = useState([]);
   const fileInputRef = useRef(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+
+  const categories = ["দর্শনীয় ধর্মীয় প্রার্থনাস্থল", "জাদুঘর", "ভাস্কর্য"];
 
   // Function to handle multiple file uploads and previews
   const handleFileChange = (e) => {
@@ -16,16 +22,16 @@ function CreatePost() {
     files.forEach((file) => {
       const reader = new FileReader();
       const fileData = {
-        id: URL.createObjectURL(file), // unique identifier for each file
+        id: URL.createObjectURL(file),
         type: file.type.startsWith("image") ? "image" : "video",
         file,
-        name: file.name, // store file name for display
+        name: file.name,
       };
 
       reader.onloadend = () => {
         fileData.preview = reader.result;
         setMediaPreviews((prev) => [...prev, fileData]);
-        setFileNames((prev) => [...prev, file.name]); // store file name for display
+        setFileNames((prev) => [...prev, file.name]);
       };
       reader.readAsDataURL(file);
     });
@@ -52,6 +58,7 @@ function CreatePost() {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
+    formData.append("category", category);
 
     if (userData) {
       formData.append("userEmail", userData.email);
@@ -59,12 +66,9 @@ function CreatePost() {
       formData.append("userName", userData.name);
     }
 
-    // Append each file to the FormData object
     mediaPreviews.forEach((media) => {
       formData.append("media", media.file);
     });
-
-    console.log(formData);
 
     try {
       const response = await axios.post(
@@ -73,28 +77,32 @@ function CreatePost() {
         {
           headers: {
             "Content-Type": "multipart/form-data",
+
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      console.log(response.data);
-      alert("Post created successfully!");
+      if (response.data.post.insertedId) {
+        toast.success(response.data.message);
+      }
       // Reset form fields after successful submission
       setTitle("");
       setDescription("");
+      setCategory("");
       setMediaPreviews([]);
       setFileNames([]);
       fileInputRef.current.value = "";
     } catch (error) {
       console.error("Error creating post:", error);
-      alert("Failed to create post.");
+      toast.error("Failed to create post.");
     }
   };
 
   return (
-    <div className="mt-5 flex flex-col items-center justify-center">
-      <h2 className="text-6xl mb-6 font-bold">Create Post</h2>
+    <div className="mt-10 flex flex-col items-center justify-center">
+      <h2 className="text-6xl mb-10 font-bold">Create Post</h2>
       <form
-        className="w-full max-w-7xl bg-white p-8 shadow-2xl rounded-lg"
+        className="w-full max-w-5xl bg-white p-8 shadow-2xl rounded-lg"
         onSubmit={handleSubmit}
       >
         <div className="mb-6">
@@ -114,7 +122,6 @@ function CreatePost() {
               onChange={handleFileChange}
               className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
             />
-            {/* Display file names */}
             <div className="ml-4 text-gray-500 text-sm">
               {fileNames.length > 0
                 ? fileNames.join(", ")
@@ -122,7 +129,6 @@ function CreatePost() {
             </div>
           </div>
         </div>
-
         {/* Preview Section */}
         {mediaPreviews.length > 0 && (
           <div className="flex flex-wrap mb-6 gap-4">
@@ -144,11 +150,10 @@ function CreatePost() {
                     className="w-full h-full object-cover"
                   />
                 )}
-                {/* Close button to remove the media */}
                 <button
                   type="button"
                   onClick={() => handleRemoveMedia(media.id)}
-                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full py-0 text-xl px-2 hover:bg-red-600 transition"
                 >
                   &times;
                 </button>
@@ -156,7 +161,7 @@ function CreatePost() {
             ))}
           </div>
         )}
-
+        {/* Title Input */}
         <div className="mb-6">
           <label
             className="block text-gray-700 text-xl font-bold mb-2"
@@ -174,6 +179,32 @@ function CreatePost() {
             required
           />
         </div>
+        {/* Category Dropdown */}
+        <div className="mb-6">
+          <label
+            className="block text-gray-700 text-xl font-bold mb-2"
+            htmlFor="category"
+          >
+            Category
+          </label>
+          <select
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            required
+          >
+            <option value="" disabled>
+              Select a category
+            </option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+        {/* Description Input */}
         <div className="mb-6">
           <label
             className="block text-gray-700 text-xl font-bold mb-2"
@@ -186,7 +217,7 @@ function CreatePost() {
             placeholder="Enter post description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full border border-gray-300 p-2 rounded h-96 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full border border-gray-300 p-2 rounded h-60 focus:outline-none focus:ring-2 focus:ring-green-500"
             required
           ></textarea>
         </div>

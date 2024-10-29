@@ -7,6 +7,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import CreatePost from "../pages/Dashboard/CreatePost";
 import ProtectedRoute from "./ProtectedRoute";
 import PrivateRoute from "./privateRoute";
+import PendingPost from "../pages/Dashboard/PendingPost";
 
 export const router = createBrowserRouter([
   {
@@ -44,8 +45,12 @@ export const router = createBrowserRouter([
     ),
     children: [
       {
-        path: "/dashboard",
+        index: true,
         element: <CreatePost />,
+      },
+      {
+        path: "pending-post",
+        element: <PendingPost />,
       },
     ],
   },
