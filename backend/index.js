@@ -172,6 +172,7 @@ async function run() {
             category,
             media: mediaPaths,
             postedBy: { userName, userEmail, userRole },
+            postedOn: new Date().toLocaleDateString(),
             status, // Include status based on role
           };
 
@@ -226,7 +227,12 @@ async function run() {
     });
 
     // get a single post based on id
-    app.get("/posts/:id", async (req, res) => {});
+    app.get("/posts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await postsCollection.findOne(query);
+      res.send(result);
+    });
 
     // get user and user role role api
     app.get("/user/:email", async (req, res) => {

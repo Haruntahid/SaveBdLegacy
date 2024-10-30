@@ -8,6 +8,7 @@ import CreatePost from "../pages/Dashboard/CreatePost";
 import ProtectedRoute from "./ProtectedRoute";
 import PrivateRoute from "./privateRoute";
 import PendingPost from "../pages/Dashboard/PendingPost";
+import PostDetailsPage from "../pages/Dashboard/PostDetailsPage";
 
 export const router = createBrowserRouter([
   {
@@ -51,6 +52,12 @@ export const router = createBrowserRouter([
       {
         path: "pending-post",
         element: <PendingPost />,
+      },
+      {
+        path: "post-details/:id",
+        element: <PostDetailsPage />,
+        loader: ({ params }) =>
+          fetch(`http://localhost:8000/posts/${params.id}`),
       },
     ],
   },

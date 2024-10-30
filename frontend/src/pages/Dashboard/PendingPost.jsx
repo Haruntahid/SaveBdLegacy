@@ -3,6 +3,7 @@ import axios from "axios";
 import { AuthContext } from "../../provider/AuthProvider";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import { Link } from "react-router-dom";
 
 function PendingPost() {
   const { token } = useContext(AuthContext);
@@ -127,9 +128,12 @@ function PendingPost() {
                     >
                       Delete
                     </button>
-                    <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
+                    <Link
+                      to={`/dashboard/post-details/${post._id}`}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                    >
                       Details
-                    </button>
+                    </Link>
                   </div>
                 </td>
               </tr>
